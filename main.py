@@ -12,4 +12,4 @@ load = st.number_input("Enter Load (N)", min_value=0.0, step=0.1)
 
 # Button to simulate prediction
 if st.button("Predict"):
-    st.success("We are working on it!")
+    st.success("You are a bit early, We are working on it!")
