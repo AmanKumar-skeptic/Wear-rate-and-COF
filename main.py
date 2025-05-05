@@ -8,7 +8,7 @@ from xgboost import XGBRegressor
 # Load and preprocess data
 @st.cache_data
 def load_data():
-    data = pd.read_csv('D:/Compressive_Sterngth/Mega Dataset_Wear Dataset - Compilation.csv')
+    data = pd.read_csv('Mega Dataset_Wear Dataset - Compilation.csv')
     return data
 
 # Train model
