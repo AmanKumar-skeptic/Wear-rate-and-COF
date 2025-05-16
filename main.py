@@ -7,7 +7,7 @@ import pickle
 # Load and preprocess data
 @st.cache_data
 def load_data():
-    data = pd.read_csv('D:/Compressive_Sterngth/Mega Dataset_Wear Dataset - Compilation.csv')
+    data = pd.read_csv('Appendix1_Mega Dataset_Wear Dataset.csv')
     return data
 
 # Load the pre-trained model
