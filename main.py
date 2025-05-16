@@ -50,14 +50,15 @@ def main():
     
     with col3:
         sliding_speed = st.slider("Sliding Speed", min_value=1, max_value=3, step=1)
-        phase = st.selectbox("Phase", ["FCC", "BCC", "MIP"])
+        phase = st.selectbox("Phase", ["FCC", "BCC", "BCC_FCC", "MIP"])
     
-    # Create input dataframe with exact feature names expected by the model
+    # Create input dataframe with exact feature names and order expected by the model
     input_data = pd.DataFrame({
         'Load': [load],
         'Sliding Distance': [sliding_distance],
         'Sliding Speed': [sliding_speed],
         'Phase_BCC': [1 if phase == "BCC" else 0],
+        'Phase_BCC_FCC': [1 if phase == "BCC_FCC" else 0],
         'Phase_FCC': [1 if phase == "FCC" else 0],
         'Phase_MIP': [1 if phase == "MIP" else 0]
     })
@@ -65,6 +66,18 @@ def main():
     # Add encoded combination
     combination_df = pd.DataFrame({'Combination': [combination]})
     input_data['encoded_combination'] = encoder.transform(combination_df)
+    
+    # Reorder columns to match the training data order
+    input_data = input_data[[
+        'Load',
+        'Sliding Distance',
+        'Sliding Speed',
+        'encoded_combination',
+        'Phase_BCC',
+        'Phase_BCC_FCC',
+        'Phase_FCC',
+        'Phase_MIP'
+    ]]
     
     # Make prediction
     if st.button("Predict Wear Rate"):
