@@ -2,13 +2,12 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from category_encoders import TargetEncoder
 import pickle
 
 # Load and preprocess data
 @st.cache_data
 def load_data():
-    data = pd.read_csv('Appendix1_Mega Dataset_Wear Dataset.csv')
+    data = pd.read_csv('D:/Compressive_Sterngth/Mega Dataset_Wear Dataset - Compilation.csv')
     return data
 
 # Load the pre-trained model
@@ -45,20 +44,16 @@ def main():
     with col3:
         sliding_speed = st.slider("Sliding Speed", min_value=1, max_value=3, step=1)
     
-    # Create input dataframe
+    # Create input dataframe with exact feature names expected by the model
     input_data = pd.DataFrame({
-        'Combination': [combination],
-        'Load': [load],
-        'Sliding Distance': [sliding_distance],
-        'Sliding Speed': [sliding_speed]
+        'Load (N)': [load],
+        'Sliding Distance (m)': [sliding_distance],
+        'Sliding Speed (m/s)': [sliding_speed]
     })
-    
-    # Prepare features for prediction
-    X_pred = input_data[['Load', 'Sliding Distance', 'Sliding Speed']]
     
     # Make prediction
     if st.button("Predict Wear Rate"):
-        prediction = model.predict(X_pred)[0]
+        prediction = model.predict(input_data)[0]
         
         # Get actual wear rate for comparison
         actual_data = data[
