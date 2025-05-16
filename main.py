@@ -3,27 +3,20 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from category_encoders import TargetEncoder
-from xgboost import XGBRegressor
+import pickle
 
 # Load and preprocess data
 @st.cache_data
 def load_data():
-    data = pd.read_csv('Mega Dataset_Wear Dataset - Compilation.csv')
+    data = pd.read_csv('D:/Compressive_Sterngth/Mega Dataset_Wear Dataset - Compilation.csv')
     return data
 
-# Train model
-@st.cache_data
-def train_model(data):
-    encoder = TargetEncoder(smoothing=5)
-    data['encoded_combination'] = encoder.fit_transform(data['Combination'], data['Wear Rate'])
-    
-    X = data.drop(columns=['Combination', 'Phase', 'Wear Rate'])
-    y = data['Wear Rate']
-    
-    model = XGBRegressor(n_estimators=100, learning_rate=0.005, max_depth=3, random_state=42)
-    model.fit(X, y)
-    
-    return model, encoder
+# Load the pre-trained model
+@st.cache_resource
+def load_model():
+    with open('rf_hea_wr.pkl', 'rb') as file:
+        model = pickle.load(file)
+    return model
 
 def main():
     st.title("Wear Rate Prediction App")
@@ -31,8 +24,8 @@ def main():
     # Load data
     data = load_data()
     
-    # Train model
-    model, encoder = train_model(data)
+    # Load pre-trained model
+    model = load_model()
     
     # Get unique combinations
     combinations = sorted(data['Combination'].unique())
@@ -60,11 +53,8 @@ def main():
         'Sliding Speed': [sliding_speed]
     })
     
-    # Encode combination
-    input_data['encoded_combination'] = encoder.transform(input_data['Combination'])
-    
     # Prepare features for prediction
-    X_pred = input_data.drop(columns=['Combination'])
+    X_pred = input_data[['Load', 'Sliding Distance', 'Sliding Speed']]
     
     # Make prediction
     if st.button("Predict Wear Rate"):
