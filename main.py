@@ -20,7 +20,7 @@ def load_model_and_encoder():
     # Create and fit the target encoder
     data = load_data()
     encoder = TargetEncoder(smoothing=5)
-    encoder.fit(data['Combination'], data['Wear Rate'])
+    encoder.fit(data[['Combination']], data['Wear Rate'])
     
     return model, encoder
 
@@ -63,7 +63,8 @@ def main():
     })
     
     # Add encoded combination
-    input_data['encoded_combination'] = encoder.transform(pd.Series([combination]))
+    combination_df = pd.DataFrame({'Combination': [combination]})
+    input_data['encoded_combination'] = encoder.transform(combination_df)
     
     # Make prediction
     if st.button("Predict Wear Rate"):
