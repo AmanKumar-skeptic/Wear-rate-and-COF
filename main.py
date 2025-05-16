@@ -7,7 +7,7 @@ import pickle
 # Load and preprocess data
 @st.cache_data
 def load_data():
-    data = pd.read_csv('Appendix1_Mega Dataset_Wear Dataset.csv')
+    data = pd.read_csv('D:/Compressive_Sterngth/Mega Dataset_Wear Dataset - Compilation.csv')
     return data
 
 # Load the pre-trained model
@@ -43,12 +43,17 @@ def main():
     
     with col3:
         sliding_speed = st.slider("Sliding Speed", min_value=1, max_value=3, step=1)
+        phase = st.selectbox("Phase", ["FCC", "BCC", "BCC_FCC", "MIP"])
     
     # Create input dataframe with exact feature names expected by the model
     input_data = pd.DataFrame({
-        'Load (N)': [load],
-        'Sliding Distance (m)': [sliding_distance],
-        'Sliding Speed (m/s)': [sliding_speed]
+        'Load': [load],
+        'Sliding Distance': [sliding_distance],
+        'Sliding Speed': [sliding_speed],
+        'Phase_BCC': [1 if phase == "BCC" else 0],
+        'Phase_BCC_FCC': [1 if phase == "BCC_FCC" else 0],
+        'Phase_FCC': [1 if phase == "FCC" else 0],
+        'Phase_MIP': [1 if phase == "MIP" else 0]
     })
     
     # Make prediction
@@ -60,7 +65,8 @@ def main():
             (data['Combination'] == combination) &
             (data['Load'] == load) &
             (data['Sliding Distance'] == sliding_distance) &
-            (data['Sliding Speed'] == sliding_speed)
+            (data['Sliding Speed'] == sliding_speed) &
+            (data['Phase'] == phase)
         ]
         
         if not actual_data.empty:
