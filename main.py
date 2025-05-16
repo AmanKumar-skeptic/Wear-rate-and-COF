@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+from category_encoders import TargetEncoder
 import pickle
 
 # Load and preprocess data
@@ -10,12 +11,18 @@ def load_data():
     data = pd.read_csv('Appendix1_Mega Dataset_Wear Dataset.csv')
     return data
 
-# Load the pre-trained model
+# Load the pre-trained model and create encoder
 @st.cache_resource
-def load_model():
+def load_model_and_encoder():
     with open('rf_hea_wr.pkl', 'rb') as file:
         model = pickle.load(file)
-    return model
+    
+    # Create and fit the target encoder
+    data = load_data()
+    encoder = TargetEncoder(smoothing=5)
+    encoder.fit(data['Combination'], data['Wear Rate'])
+    
+    return model, encoder
 
 def main():
     st.title("Wear Rate Prediction App")
@@ -23,8 +30,8 @@ def main():
     # Load data
     data = load_data()
     
-    # Load pre-trained model
-    model = load_model()
+    # Load pre-trained model and encoder
+    model, encoder = load_model_and_encoder()
     
     # Get unique combinations
     combinations = sorted(data['Combination'].unique())
@@ -43,7 +50,7 @@ def main():
     
     with col3:
         sliding_speed = st.slider("Sliding Speed", min_value=1, max_value=3, step=1)
-        phase = st.selectbox("Phase", ["FCC", "BCC", "BCC_FCC", "MIP"])
+        phase = st.selectbox("Phase", ["FCC", "BCC", "MIP"])
     
     # Create input dataframe with exact feature names expected by the model
     input_data = pd.DataFrame({
@@ -51,10 +58,12 @@ def main():
         'Sliding Distance': [sliding_distance],
         'Sliding Speed': [sliding_speed],
         'Phase_BCC': [1 if phase == "BCC" else 0],
-        'Phase_BCC_FCC': [1 if phase == "BCC_FCC" else 0],
         'Phase_FCC': [1 if phase == "FCC" else 0],
         'Phase_MIP': [1 if phase == "MIP" else 0]
     })
+    
+    # Add encoded combination
+    input_data['encoded_combination'] = encoder.transform(pd.Series([combination]))
     
     # Make prediction
     if st.button("Predict Wear Rate"):
